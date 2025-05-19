@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://backend:5000/api
+      - REACT_APP_SITE_NAME=MyAuthApp
+    depends_on:
+      - backend
+    networks:
+      - auth-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/authdb
+      - JWT_SECRET=your_jwt_secret_here
+      - JWT_EXPIRE=30d
+    depends_on:
+      - mongo
+    networks:
+      - auth-network
+
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - auth-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  auth-network:
+    driver: bridge
